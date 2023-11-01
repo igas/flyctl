@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"os"
 	"os/exec"
+
+	"github.com/superfly/flyctl/agent"
 )
 
 var metrics []metricsMessage = make([]metricsMessage, 0)
@@ -33,14 +35,15 @@ func FlushMetrics() error {
 
 	cmd.Stdin = &buffer
 	cmd.Env = os.Environ()
+	cmd.Env = append(cmd.Env, "FLY_NO_UPDATE_CHECK=1")
 
-	err = cmd.Start()
-	if err != nil {
+	agent.SetSysProcAttributes(cmd)
+
+	if err := cmd.Process.Release(); err != nil {
 		return err
 	}
 
-	err = cmd.Process.Release()
-	if err != nil {
+	if err := cmd.Start(); err != nil {
 		return err
 	}
 
