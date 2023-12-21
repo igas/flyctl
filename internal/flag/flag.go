@@ -573,3 +573,17 @@ Repeat for each volume in order (comma-separated lists not accepted)
 `,
 	}
 }
+
+var ForceLinkName = "force-link"
+
+func ForceLink() Bool {
+	return Bool{
+		Name:        ForceLinkName,
+		Description: "Force linking to an app and overwriting of secrets when an app already is already linked to a database",
+	}
+}
+
+func GetForceLink(ctx context.Context) bool {
+	return GetBool(ctx, ForceLinkName)
+
+}

@@ -33,6 +33,7 @@ type ExtensionParams struct {
 	Organization *api.Organization
 	Provider     string
 	Options      map[string]interface{}
+	ForceLink    bool
 }
 
 // Common flags that should be used for all extension commands
@@ -72,7 +73,7 @@ func ProvisionExtension(ctx context.Context, params ExtensionParams) (extension 
 		targetApp = appResponse.App.AppData
 		targetOrg = appResponse.App.Organization.OrganizationData
 
-		if len(appResponse.App.AddOns.Nodes) > 0 {
+		if !params.ForceLink && len(appResponse.App.AddOns.Nodes) > 0 {
 			existsError := fmt.Errorf("A %s %s named %s already exists for app %s", provider.DisplayName, provider.ResourceName, colorize.Green(appResponse.App.AddOns.Nodes[0].Name), colorize.Green(params.AppName))
 
 			return extension, existsError
@@ -214,7 +215,7 @@ func ProvisionExtension(ctx context.Context, params ExtensionParams) (extension 
 			colorize.Green(primaryRegion), provider.DisplayName)
 	}
 
-	setSecretsFromExtension(ctx, &targetApp, &extension)
+	setSecretsFromExtension(ctx, &targetApp, &extension, params.ForceLink)
 
 	return extension, nil
 }
@@ -415,7 +416,7 @@ func Discover(ctx context.Context, provider gql.AddOnType) (addOn *gql.AddOnData
 	return
 }
 
-func setSecretsFromExtension(ctx context.Context, app *gql.AppData, extension *Extension) (err error) {
+func setSecretsFromExtension(ctx context.Context, app *gql.AppData, extension *Extension, force bool) (err error) {
 	var (
 		io              = iostreams.FromContext(ctx)
 		client          = client.FromContext(ctx).API().GenqClient
@@ -444,7 +445,7 @@ func setSecretsFromExtension(ctx context.Context, app *gql.AppData, extension *E
 			}
 		}
 
-		if len(matchingNames) > 0 {
+		if !force && len(matchingNames) > 0 {
 			fmt.Fprintf(io.Out, "Secrets %v already exist on app %s. They won't be set automatically.\n\n", matchingNames, app.Name)
 			setSecrets = false
 		}

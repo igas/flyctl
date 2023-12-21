@@ -26,6 +26,7 @@ func create() (cmd *cobra.Command) {
 		flag.AppConfig(),
 		flag.Org(),
 		flag.Region(),
+		flag.ForceLink(),
 		extensions_core.SharedFlags,
 		flag.String{
 			Name:        "name",
@@ -38,7 +39,9 @@ func create() (cmd *cobra.Command) {
 
 func runCreate(ctx context.Context) (err error) {
 	appName := appconfig.NameFromContext(ctx)
-	params := extensions_core.ExtensionParams{}
+	params := extensions_core.ExtensionParams{
+		ForceLink: flag.GetForceLink(ctx),
+	}
 
 	if appName != "" {
 		params.AppName = appName

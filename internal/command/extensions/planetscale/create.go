@@ -24,6 +24,7 @@ func create() (cmd *cobra.Command) {
 		flag.App(),
 		flag.AppConfig(),
 		flag.Org(),
+		flag.ForceLink(),
 		flag.Region(),
 		flag.String{
 			Name:        "name",
